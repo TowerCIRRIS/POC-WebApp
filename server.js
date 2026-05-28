@@ -191,6 +191,59 @@ app.get('/api/professionals/:professionalId/patients', (req, res) => {
   res.json(patientsWithData);
 });
 
+// Réception des données ESP32
+app.post('/api/device-data', (req, res) => {
+  const { deviceToken, movements, duration } = req.body;
+
+  if (!deviceToken) {
+    return res.status(400).json({ error: 'deviceToken requis' });
+  }
+
+  const usersData = readUsers();
+  const patient = usersData.users.find(u => u.deviceToken === deviceToken && u.role === 'patient');
+
+  if (!patient) {
+    return res.status(404).json({ error: 'Appareil non associé à un patient' });
+  }
+
+  const submissions = readSubmissions();
+  const entry = {
+    id: 'device_' + Date.now(),
+    patientId: patient.id,
+    timestamp: new Date().toISOString(),
+    source: 'esp32',
+    movements: parseInt(movements) || 0,
+    duration: parseInt(duration) || 0
+  };
+
+  submissions.submissions.push(entry);
+  writeSubmissions(submissions);
+
+  res.json({ ok: true, patientId: patient.id });
+});
+
+// Associer un appareil ESP32 à un patient (pro seulement)
+app.post('/api/patients/:patientId/device', (req, res) => {
+  const { patientId } = req.params;
+  const { deviceToken, professionalId } = req.body;
+
+  const usersData = readUsers();
+  const pro = usersData.users.find(u => u.id === professionalId && u.role === 'professional');
+  if (!pro) return res.status(401).json({ error: 'Non autorisé' });
+
+  const patient = usersData.users.find(u => u.id === patientId);
+  if (!patient) return res.status(404).json({ error: 'Patient non trouvé' });
+
+  if (deviceToken) {
+    patient.deviceToken = deviceToken;
+  } else {
+    delete patient.deviceToken;
+  }
+  writeUsers(usersData);
+
+  res.json({ ok: true, deviceToken });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

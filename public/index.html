@@ -397,6 +397,31 @@
       text-transform: uppercase;
       margin-top: 0.25rem;
     }
+    .device-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #f0f0f0;
+    }
+    .device-badge {
+      font-size: 12px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    .device-badge.assigned { background: #e8f5e9; color: #2e7d32; }
+    .device-badge.unassigned { background: #f5f5f5; color: #999; }
+    .device-btn {
+      font-size: 12px;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid #667eea;
+      border-radius: 4px;
+      background: white;
+      color: #667eea;
+      cursor: pointer;
+    }
+    .device-btn:hover { background: #667eea; color: white; }
 
     .submission-history {
       background: white;
@@ -664,6 +689,25 @@
   </nav>
 </div>
 
+<!-- ASSIGN DEVICE MODAL -->
+<div class="modal" id="assignDeviceModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeAssignDevice()">×</button>
+    <div class="modal-header">
+      <h2>Assigner un capteur</h2>
+      <p style="font-size:13px;color:#999;margin-top:0.25rem">Entrez l'ID inscrit sur le capteur ESP32</p>
+    </div>
+    <div class="form-group">
+      <label>ID du capteur</label>
+      <input type="text" id="deviceTokenInput" placeholder="ex: ESP32-001" style="font-family:monospace">
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1rem">
+      <button class="btn btn-primary" onclick="handleAssignDevice()">Assigner</button>
+      <button class="btn" style="background:#fee;color:#e74c3c;border:1px solid #e74c3c" onclick="handleRemoveDevice()">Retirer le capteur</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADD PATIENT MODAL -->
 <div class="modal" id="addPatientModal">
   <div class="modal-content">
@@ -900,6 +944,14 @@
               <div class="patient-stat-label">Douleur</div>
             </div>
           </div>
+          <div class="device-row" onclick="event.stopPropagation()">
+            <span class="device-badge ${patient.deviceToken ? 'assigned' : 'unassigned'}">
+              ${patient.deviceToken ? '📡 ' + patient.deviceToken : '⚪ Aucun capteur'}
+            </span>
+            <button class="device-btn" onclick="openAssignDevice('${patient.id}', '${patient.deviceToken || ''}')">
+              ${patient.deviceToken ? 'Changer' : 'Assigner'}
+            </button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -988,6 +1040,47 @@
   function goBackToPro() {
     showPage('professionalDashboard');
     loadProfessionalData();
+  }
+
+  // ASSIGN DEVICE
+  let assigningPatientId = null;
+
+  function openAssignDevice(patientId, currentToken) {
+    assigningPatientId = patientId;
+    document.getElementById('deviceTokenInput').value = currentToken;
+    document.getElementById('assignDeviceModal').classList.add('active');
+  }
+
+  function closeAssignDevice() {
+    assigningPatientId = null;
+    document.getElementById('assignDeviceModal').classList.remove('active');
+  }
+
+  async function handleAssignDevice() {
+    const token = document.getElementById('deviceTokenInput').value.trim();
+    if (!token) return alert('Entrez un ID de capteur');
+    await saveDeviceToken(assigningPatientId, token);
+  }
+
+  async function handleRemoveDevice() {
+    if (!confirm('Retirer le capteur de ce patient?')) return;
+    await saveDeviceToken(assigningPatientId, '');
+  }
+
+  async function saveDeviceToken(patientId, token) {
+    try {
+      const res = await fetch(`${API_URL}/patients/${patientId}/device`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceToken: token, professionalId: currentUser.id })
+      });
+      if (res.ok) {
+        closeAssignDevice();
+        loadProfessionalData();
+      }
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    }
   }
 
   // ADD PATIENT
