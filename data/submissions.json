@@ -1,0 +1,31 @@
+{
+  "submissions": [
+    {
+      "id": "sub_1779980429733",
+      "patientId": "patient_1779980386841",
+      "timestamp": "2026-05-28T15:00:29.733Z",
+      "pain": 7,
+      "fatigue": 3,
+      "functionality": 2,
+      "completedExercises": 0
+    },
+    {
+      "id": "sub_1779980437768",
+      "patientId": "patient_1779980386841",
+      "timestamp": "2026-05-28T15:00:37.768Z",
+      "pain": 2,
+      "fatigue": 8,
+      "functionality": 1,
+      "completedExercises": 0
+    },
+    {
+      "id": "sub_1779981243677",
+      "patientId": "patient1",
+      "timestamp": "2026-05-28T15:14:03.678Z",
+      "pain": 5,
+      "fatigue": 3,
+      "functionality": 2,
+      "completedExercises": 8
+    }
+  ]
+}

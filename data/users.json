@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "pro1",
+      "username": "therapiste",
+      "password": "password123",
+      "role": "professional",
+      "name": "Dr. Marie Dupont",
+      "patients": [
+        "patient1",
+        "patient2",
+        "patient_1779980386841"
+      ]
+    },
+    {
+      "id": "patient1",
+      "username": "jean",
+      "password": "password123",
+      "role": "patient",
+      "name": "Jean Martin",
+      "professionalId": "pro1",
+      "createdAt": "2026-05-28T14:54:47.843Z"
+    },
+    {
+      "id": "patient2",
+      "username": "marie",
+      "password": "password123",
+      "role": "patient",
+      "name": "Marie Bouchard",
+      "professionalId": "pro1",
+      "createdAt": "2026-05-28T14:54:47.844Z"
+    },
+    {
+      "id": "patient_1779980386841",
+      "username": "pauld",
+      "password": "paul123!",
+      "role": "patient",
+      "name": "Paul Dutil",
+      "professionalId": "pro1",
+      "createdAt": "2026-05-28T14:59:46.843Z"
+    }
+  ]
+}

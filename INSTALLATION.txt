@@ -1,0 +1,45 @@
+📁 STRUCTURE DES FICHIERS
+========================
+
+Téléchargez tous ces fichiers et organisez-les comme ceci:
+
+```
+mon-app-rehabitation/
+├── server.js                 ← Backend Express
+├── package.json              ← Dépendances npm
+├── start.sh                  ← Lancement macOS/Linux
+├── start.bat                 ← Lancement Windows
+├── README.md                 ← Documentation complète
+├── DEMARRAGE_RAPIDE.txt      ← Guide rapide
+│
+├── public/
+│   └── index.html           ← Interface web
+│
+└── data/                     ← Dossier DATA (sera créé automatiquement)
+    ├── users.json           ← Comptes (créé auto)
+    └── submissions.json     ← Réponses (créé auto)
+```
+
+🔧 INSTALLATION
+===============
+
+1. Téléchargez TOUS les fichiers ci-dessus
+2. Mettez-les dans un dossier (ex: ~/Documents/rehab-app)
+3. Ouvrez Terminal/PowerShell dans ce dossier
+4. Tapez : npm install
+5. Tapez : npm start
+
+Voilà ! L'app est lancée ! 🚀
+
+📱 ACCÈS
+========
+- Ordinateur : http://localhost:3000
+- Téléphone (WiFi) : http://[votre-IP]:3000
+
+📊 COMPTES DE TEST
+==================
+Thérapeute: therapiste / password123
+Patient 1: jean / password123
+Patient 2: marie / password123
+
+✅ PRÊT !

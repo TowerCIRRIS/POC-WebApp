@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suivi Réadaptation - Membre Supérieur</title>
+  <link href="https://cdn.jsdelivr.net/npm/tabler-icons@latest/tabler-icons/tabler-icons.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+    .dark-mode body { background: #1a1a1a; color: #f5f5f5; }
+
+    /* LOGIN SCREEN */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .login-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-header h1 {
+      font-size: 24px;
+      margin-bottom: 0.5rem;
+    }
+    .login-header p {
+      color: #666;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+    }
+    .error { color: #e74c3c; font-size: 13px; margin-top: 0.5rem; }
+
+    /* APP SCREEN */
+    .app-screen { display: none; }
+    .app-screen.active { display: flex; }
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      background: #f5f5f5;
+    }
+    .sidebar {
+      width: 250px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .sidebar-header h2 {
+      font-size: 18px;
+      margin-bottom: 0.25rem;
+    }
+    .sidebar-header p {
+      font-size: 12px;
+      color: #999;
+    }
+    .sidebar-menu {
+      list-style: none;
+    }
+    .sidebar-menu li {
+      margin-bottom: 0.75rem;
+    }
+    .sidebar-menu button {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #666;
+      transition: all 0.2s;
+    }
+    .sidebar-menu button:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .sidebar-menu button.active {
+      background: #667eea;
+      color: white;
+    }
+    .logout-btn {
+      width: 100%;;
+      margin-top: 2rem;
+      padding: 0.75rem;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .logout-btn:hover { background: #c0392b; }
+
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      margin-bottom: 0.5rem;
+    }
+    .page-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* PATIENT DASHBOARD */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .questionnaire-form {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+    .form-section {
+      margin-bottom: 2rem;
+    }
+    .form-section h3 {
+      font-size: 16px;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .scale-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .scale-input {
+      flex: 1;
+    }
+    .scale-input input[type="range"] {
+      width: 100%;
+    }
+    .scale-value {
+      font-weight: 600;
+      min-width: 40px;
+      text-align: center;
+      color: #667eea;
+    }
+    .functionality-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .func-btn {
+      padding: 1rem;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .func-btn:hover {
+      border-color: #667eea;
+      background: #f9f9f9;
+    }
+    .func-btn.selected {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+    .submit-btn {
+      background: #27ae60;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      width: 100%;
+    }
+    .submit-btn:hover { background: #229954; }
+
+    .chart-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+      position: relative;
+      height: 300px;
+    }
+
+    /* PATIENT LIST (PRO) */
+    .patients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .patient-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    .patient-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .patient-card h3 {
+      font-size: 18px;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    .patient-meta {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 1rem;
+    }
+    .patient-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    .patient-stat {
+      text-align: center;
+    }
+    .patient-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .patient-stat-label {
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    .submission-history {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .submission-item {
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .submission-item:last-child { border-bottom: none; }
+    .submission-date {
+      font-size: 12px;
+      color: #999;
+    }
+    .submission-data {
+      display: flex;
+      gap: 2rem;
+      margin-top: 0.5rem;
+    }
+    .submission-datum {
+      font-size: 13px;
+    }
+    .submission-datum strong {
+      color: #667eea;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .modal-header h2 {
+      font-size: 20px;
+    }
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    @media (max-width: 768px) {
+      .app-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .sidebar-menu li {
+        margin-bottom: 0;
+        flex: 1;
+        min-width: 120px;
+      }
+      .main-content {
+        padding: 1rem;
+      }
+      .patients-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>🏥 Réadaptation</h1>
+      <p>Suivi du membre supérieur</p>
+    </div>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input type="text" id="username" name="username" placeholder="ex: jean" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Connexion</button>
+      <div id="loginError" class="error"></div>
+    </form>
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e0e0e0; font-size: 12px; color: #999;">
+      <p><strong>Comptes de test:</strong></p>
+      <p>Thérapeute: therapiste / password123</p>
+      <p>Patient: jean / password123</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div class="app-screen" id="appScreen">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2 id="userNameDisplay">Patient</h2>
+        <p id="userRoleDisplay">Patient</p>
+      </div>
+      <ul class="sidebar-menu" id="sidebarMenu"></ul>
+      <button class="logout-btn" onclick="handleLogout()">Déconnexion</button>
+    </div>
+
+    <div class="main-content">
+      <!-- PATIENT DASHBOARD -->
+      <div class="page" id="patientDashboard">
+        <div class="page-header">
+          <h1>Mon suivi</h1>
+          <p>Remplissez le questionnaire 1-2 fois par jour</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Soumissions</div>
+            <div class="stat-value" id="totalSubmissions">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cette semaine</div>
+            <div class="stat-value" id="weekSubmissions">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Douleur moy.</div>
+            <div class="stat-value" id="avgPain">-</div>
+          </div>
+        </div>
+
+        <div class="questionnaire-form">
+          <h2 style="margin-bottom: 1.5rem; font-size: 20px;">Questionnaire du jour</h2>
+
+          <div class="form-section">
+            <h3>Douleur ressentie</h3>
+            <div class="scale-group">
+              <div class="scale-input">
+                <input type="range" id="painScale" min="0" max="10" value="5" oninput="updatePainValue(this.value)">
+              </div>
+              <div class="scale-value" id="painValue">5</div>
+            </div>
+            <p style="font-size: 12px; color: #999; margin-top: 0.5rem;">0 = aucune, 10 = maximale</p>
+          </div>
+
+          <div class="form-section">
+            <h3>Fatigue ressentie</h3>
+            <div class="scale-group">
+              <div class="scale-input">
+                <input type="range" id="fatigueScale" min="0" max="10" value="5" oninput="updateFatigueValue(this.value)">
+              </div>
+              <div class="scale-value" id="fatigueValue">5</div>
+            </div>
+            <p style="font-size: 12px; color: #999; margin-top: 0.5rem;">0 = pas fatigué, 10 = très fatigué</p>
+          </div>
+
+          <div class="form-section">
+            <h3>Capacité fonctionnelle</h3>
+            <div class="functionality-buttons">
+              <button type="button" class="func-btn" onclick="selectFunc(1)">Très limitée</button>
+              <button type="button" class="func-btn" onclick="selectFunc(2)">Limitée</button>
+              <button type="button" class="func-btn" onclick="selectFunc(3)">Modérée</button>
+              <button type="button" class="func-btn" onclick="selectFunc(4)">Bonne</button>
+            </div>
+          </div>
+
+          <button class="submit-btn" onclick="submitQuestionnaire()">Enregistrer</button>
+          <div id="submitMessage" style="margin-top: 1rem; text-align: center; font-size: 14px;"></div>
+        </div>
+
+        <h2 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 20px;">Historique</h2>
+        <div class="submission-history" id="submissionHistory">
+          <p style="color: #999; text-align: center; padding: 2rem;">Aucune soumission encore</p>
+        </div>
+      </div>
+
+      <!-- PROFESSIONAL DASHBOARD -->
+      <div class="page" id="professionalDashboard">
+        <div class="page-header">
+          <h1>Mes patients</h1>
+          <p>Suivi de l'évolution de vos patients</p>
+        </div>
+
+        <button class="btn btn-primary" style="margin-bottom: 1.5rem; max-width: 200px;" onclick="openAddPatientModal()">
+          <i class="ti ti-plus"></i> Ajouter un patient
+        </button>
+
+        <div class="patients-grid" id="patientsGrid">
+          <p style="color: #999;">Aucun patient</p>
+        </div>
+      </div>
+
+      <!-- PATIENT DETAIL (PRO) -->
+      <div class="page" id="patientDetail">
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1 id="detailPatientName">Nom du patient</h1>
+            <p id="detailPatientMeta">Informations</p>
+          </div>
+          <button onclick="goBackToPro()" style="background: #f0f0f0; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer;">← Retour</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total soumissions</div>
+            <div class="stat-value" id="detailTotalSub">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cette semaine</div>
+            <div class="stat-value" id="detailWeekSub">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Douleur moy.</div>
+            <div class="stat-value" id="detailAvgPain">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Fatigue moy.</div>
+            <div class="stat-value" id="detailAvgFatigue">-</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="patientDetailChart"></canvas>
+        </div>
+
+        <h2 style="margin-bottom: 1rem; font-size: 20px;">Dernier historique</h2>
+        <div class="submission-history" id="patientDetailHistory">
+          <p style="color: #999; text-align: center; padding: 2rem;">Aucune soumission</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PATIENT MODAL -->
+<div class="modal" id="addPatientModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeAddPatientModal()">×</button>
+    <div class="modal-header">
+      <h2>Ajouter un nouveau patient</h2>
+    </div>
+    <form onsubmit="handleAddPatient(event)">
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" id="newPatientName" required>
+      </div>
+      <div class="form-group">
+        <label>Nom d'utilisateur</label>
+        <input type="text" id="newPatientUsername" required>
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="newPatientPassword" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Créer le compte</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://192.168.2.109:3000/api';
+  let currentUser = null;
+  let currentPatient = null;
+  let selectedFunc = null;
+
+  // Initialize
+  window.addEventListener('load', () => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      currentUser = JSON.parse(savedUser);
+      showAppScreen();
+    }
+  });
+
+  // Login
+  async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!response.ok) {
+        errorDiv.textContent = 'Identifiants invalides';
+        return;
+      }
+
+      currentUser = await response.json();
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showAppScreen();
+    } catch (err) {
+      errorDiv.textContent = 'Erreur de connexion: ' + err.message;
+    }
+  }
+
+  function showAppScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.add('active');
+    
+    document.getElementById('userNameDisplay').textContent = currentUser.name;
+    document.getElementById('userRoleDisplay').textContent = 
+      currentUser.role === 'patient' ? 'Patient' : 'Thérapeute';
+
+    updateSidebar();
+    
+    if (currentUser.role === 'patient') {
+      showPage('patientDashboard');
+      loadPatientData();
+    } else {
+      showPage('professionalDashboard');
+      loadProfessionalData();
+    }
+  }
+
+  function updateSidebar() {
+    const menu = document.getElementById('sidebarMenu');
+    menu.innerHTML = '';
+
+    if (currentUser.role === 'patient') {
+      menu.innerHTML = '<li><button onclick="showPage(\'patientDashboard\')"><i class="ti ti-dashboard"></i> Mon suivi</button></li>';
+    } else {
+      menu.innerHTML = '<li><button onclick="showPage(\'professionalDashboard\')"><i class="ti ti-users"></i> Mes patients</button></li>';
+    }
+  }
+
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+  }
+
+  // PATIENT FUNCTIONS
+  async function loadPatientData() {
+    try {
+      const response = await fetch(`${API_URL}/patients/${currentUser.id}/submissions`);
+      const submissions = await response.json();
+
+      // Stats
+      document.getElementById('totalSubmissions').textContent = submissions.length;
+      
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekSubmissions = submissions.filter(s => new Date(s.timestamp) > weekAgo);
+      document.getElementById('weekSubmissions').textContent = weekSubmissions.length;
+
+      if (submissions.length > 0) {
+        const avgPain = (submissions.reduce((sum, s) => sum + s.pain, 0) / submissions.length).toFixed(1);
+        document.getElementById('avgPain').textContent = avgPain;
+      }
+
+      // History
+      renderSubmissionHistory(submissions.slice(0, 10));
+    } catch (err) {
+      console.error('Erreur lors du chargement:', err);
+    }
+  }
+
+  function renderSubmissionHistory(submissions) {
+    const historyDiv = document.getElementById('submissionHistory');
+    if (submissions.length === 0) {
+      historyDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Aucune soumission encore</p>';
+      return;
+    }
+
+    historyDiv.innerHTML = submissions.map(sub => `
+      <div class="submission-item">
+        <div>
+          <div class="submission-date">${new Date(sub.timestamp).toLocaleString('fr-CA')}</div>
+          <div class="submission-data">
+            <div class="submission-datum">Douleur: <strong>${sub.pain}/10</strong></div>
+            <div class="submission-datum">Fatigue: <strong>${sub.fatigue}/10</strong></div>
+            <div class="submission-datum">Fonction: <strong>${['', 'Très limitée', 'Limitée', 'Modérée', 'Bonne'][sub.functionality]}</strong></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updatePainValue(val) {
+    document.getElementById('painValue').textContent = val;
+  }
+
+  function updateFatigueValue(val) {
+    document.getElementById('fatigueValue').textContent = val;
+  }
+
+  function selectFunc(level) {
+    selectedFunc = level;
+    document.querySelectorAll('.func-btn').forEach(btn => btn.classList.remove('selected'));
+    event.target.classList.add('selected');
+  }
+
+  async function submitQuestionnaire() {
+    const pain = parseInt(document.getElementById('painScale').value);
+    const fatigue = parseInt(document.getElementById('fatigueScale').value);
+
+    if (!selectedFunc) {
+      alert('Veuillez sélectionner votre capacité fonctionnelle');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId: currentUser.id,
+          pain,
+          fatigue,
+          functionality: selectedFunc,
+          completedExercises: 0
+        })
+      });
+
+      if (response.ok) {
+        document.getElementById('submitMessage').textContent = '✓ Soumission enregistrée!';
+        document.getElementById('submitMessage').style.color = '#27ae60';
+        
+        // Reset form
+        document.getElementById('painScale').value = 5;
+        document.getElementById('fatigueScale').value = 5;
+        selectedFunc = null;
+        document.querySelectorAll('.func-btn').forEach(btn => btn.classList.remove('selected'));
+        updatePainValue(5);
+        updateFatigueValue(5);
+
+        setTimeout(() => {
+          document.getElementById('submitMessage').textContent = '';
+          loadPatientData();
+        }, 1500);
+      }
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    }
+  }
+
+  // PROFESSIONAL FUNCTIONS
+  async function loadProfessionalData() {
+    try {
+      const response = await fetch(`${API_URL}/professionals/${currentUser.id}/patients`);
+      const patients = await response.json();
+
+      if (patients.length === 0) {
+        document.getElementById('patientsGrid').innerHTML = '<p style="color: #999; grid-column: 1/-1;">Aucun patient. Ajoutez-en un pour commencer!</p>';
+        return;
+      }
+
+      document.getElementById('patientsGrid').innerHTML = patients.map(patient => `
+        <div class="patient-card" onclick="viewPatientDetail('${patient.id}')">
+          <h3>${patient.name}</h3>
+          <p class="patient-meta">Créé le ${new Date(patient.createdAt).toLocaleDateString('fr-CA')}</p>
+          <div class="patient-stats">
+            <div class="patient-stat">
+              <div class="patient-stat-value">${patient.totalSubmissions}</div>
+              <div class="patient-stat-label">Soumissions</div>
+            </div>
+            <div class="patient-stat">
+              <div class="patient-stat-value">${patient.lastSubmission ? patient.lastSubmission.pain : '-'}</div>
+              <div class="patient-stat-label">Douleur</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Erreur:', err);
+    }
+  }
+
+  async function viewPatientDetail(patientId) {
+    currentPatient = patientId;
+    try {
+      const response = await fetch(`${API_URL}/patients/${patientId}/submissions`);
+      const submissions = await response.json();
+
+      const patientCard = document.querySelector(`[onclick="viewPatientDetail('${patientId}')"]`);
+      const patientName = patientCard.querySelector('h3').textContent;
+
+      document.getElementById('detailPatientName').textContent = patientName;
+      document.getElementById('detailPatientMeta').textContent = `${submissions.length} soumissions`;
+
+      // Stats
+      document.getElementById('detailTotalSub').textContent = submissions.length;
+      
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekSubs = submissions.filter(s => new Date(s.timestamp) > weekAgo);
+      document.getElementById('detailWeekSub').textContent = weekSubs.length;
+
+      if (submissions.length > 0) {
+        const avgPain = (submissions.reduce((sum, s) => sum + s.pain, 0) / submissions.length).toFixed(1);
+        const avgFatigue = (submissions.reduce((sum, s) => sum + s.fatigue, 0) / submissions.length).toFixed(1);
+        document.getElementById('detailAvgPain').textContent = avgPain;
+        document.getElementById('detailAvgFatigue').textContent = avgFatigue;
+      }
+
+      renderSubmissionHistory(submissions.slice(0, 10));
+      renderPatientChart(submissions.slice(0, 14).reverse());
+
+      showPage('patientDetail');
+    } catch (err) {
+      console.error('Erreur:', err);
+    }
+  }
+
+  function renderPatientChart(submissions) {
+    const labels = submissions.map(s => new Date(s.timestamp).toLocaleDateString('fr-CA', { month: 'numeric', day: 'numeric' }));
+    const painData = submissions.map(s => s.pain);
+    const fatigueData = submissions.map(s => s.fatigue);
+
+    const ctx = document.getElementById('patientDetailChart').getContext('2d');
+    if (window.patientChart) window.patientChart.destroy();
+
+    window.patientChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Douleur',
+            data: painData,
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Fatigue',
+            data: fatigueData,
+            borderColor: '#f39c12',
+            backgroundColor: 'rgba(243, 156, 18, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          y: { beginAtZero: true, max: 10 }
+        }
+      }
+    });
+  }
+
+  function goBackToPro() {
+    showPage('professionalDashboard');
+    loadProfessionalData();
+  }
+
+  // ADD PATIENT
+  function openAddPatientModal() {
+    document.getElementById('addPatientModal').classList.add('active');
+  }
+
+  function closeAddPatientModal() {
+    document.getElementById('addPatientModal').classList.remove('active');
+  }
+
+  async function handleAddPatient(e) {
+    e.preventDefault();
+    const name = document.getElementById('newPatientName').value;
+    const username = document.getElementById('newPatientUsername').value;
+    const password = document.getElementById('newPatientPassword').value;
+
+    try {
+      const response = await fetch(`${API_URL}/patients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          professionalId: currentUser.id,
+          name,
+          username,
+          password
+        })
+      });
+
+      if (response.ok) {
+        alert('Patient créé avec succès!');
+        closeAddPatientModal();
+        document.querySelector('form').reset();
+        loadProfessionalData();
+      }
+    } catch (err) {
+      alert('Erreur: ' + err.message);
+    }
+  }
+
+  function handleLogout() {
+    if (confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+      localStorage.removeItem('currentUser');
+      currentUser = null;
+      location.reload();
+    }
+  }
+</script>
+
+</body>
+</html>

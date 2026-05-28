@@ -1,0 +1,90 @@
+🏥 APPLICATION DE SUIVI DE RÉADAPTATION - GUIDE RAPIDE
+====================================================
+
+✅ TOUT EST PRÊT ! Voici comment démarrer :
+
+## ÉTAPE 1 : Démarrer le serveur
+
+### Si vous êtes sur macOS/Linux :
+```
+./start.sh
+```
+
+### Si vous êtes sur Windows :
+Double-cliquez sur `start.bat`
+
+### Ou directement :
+```
+npm start
+```
+
+Vous devriez voir :
+```
+🚀 Serveur de réadaptation lancé sur http://localhost:3000
+📱 Accessible sur le WiFi: http://[votre-IP]:3000
+```
+
+## ÉTAPE 2 : Accéder à l'application
+
+### Sur votre ordinateur :
+Ouvrez : http://localhost:3000
+
+### Sur téléphone/iPad (même WiFi) :
+1. Trouvez votre IP locale :
+   - macOS : System Preferences > Network
+   - Windows : Cmd > `ipconfig` (IPv4 Address)
+   - Linux : `ifconfig`
+2. Ouvrez : http://[votre-IP-locale]:3000
+   Exemple: http://192.168.1.100:3000
+
+## ÉTAPE 3 : Tester avec les comptes de test
+
+### Pour tester comme PATIENT :
+- Utilisateur : jean
+- Mot de passe : password123
+→ Remplissez le questionnaire
+→ Consultez votre historique
+
+### Pour tester comme THÉRAPEUTE :
+- Utilisateur : therapiste
+- Mot de passe : password123
+→ Cliquez sur un patient pour voir son suivi
+→ Créez un nouveau patient
+
+## 📱 MULTI-APPAREIL (WiFi)
+
+L'app fonctionne sur plusieurs appareils simultanément :
+- Ordi : http://localhost:3000
+- Téléphone 1 : http://192.168.1.100:3000
+- Téléphone 2 : http://192.168.1.100:3000
+- iPad : http://192.168.1.100:3000
+
+Les données se synchronisent instantanément!
+
+## 📊 DONNÉES PERSISTANTES
+
+Toutes les données sont sauvegardées dans le dossier `data/` :
+- users.json (comptes)
+- submissions.json (réponses)
+
+Même si vous redémarrez le serveur, les données restent!
+
+## 🐛 BESOIN D'AIDE ?
+
+Si le port 3000 est déjà utilisé :
+- Modifiez la dernière ligne de server.js
+- Changez `const PORT = 3000;` en `const PORT = 3001;`
+
+Si vous ne trouvez pas votre IP :
+- Windows : ouvrez Cmd, tapez `ipconfig`, cherchez IPv4
+- macOS : ouvrez Terminal, tapez `ifconfig`, cherchez inet (pas 127.0.0.1)
+
+## 🎯 PROCHAINES ÉTAPES
+
+Après avoir testé :
+1. Modifiez les comptes de test dans server.js
+2. Créez vos propres patients
+3. Testez sur téléphone/iPad réels
+4. Collectez du feedback
+
+Bon courage ! 🚀
