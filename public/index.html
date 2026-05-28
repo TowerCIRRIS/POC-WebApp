@@ -87,7 +87,7 @@
 
     /* APP SCREEN */
     .app-screen { display: none; }
-    .app-screen.active { display: flex; }
+    .app-screen.active { display: block; }
     .app-layout {
       display: flex;
       min-height: 100vh;
@@ -99,6 +99,59 @@
       border-right: 1px solid #e0e0e0;
       padding: 1.5rem;
       overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .mobile-topbar {
+      display: none;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0.75rem 1rem;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .mobile-topbar h2 { font-size: 16px; }
+    .mobile-topbar p { font-size: 12px; color: #999; }
+    .mobile-topbar button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .mobile-bottomnav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      z-index: 100;
+    }
+    .mobile-bottomnav ul {
+      list-style: none;
+      display: flex;
+    }
+    .mobile-bottomnav ul li {
+      flex: 1;
+    }
+    .mobile-bottomnav ul li button {
+      width: 100%;
+      padding: 0.75rem 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+    }
+    .mobile-bottomnav ul li button.active {
+      color: #667eea;
+      font-weight: 600;
     }
     .sidebar-header {
       margin-bottom: 2rem;
@@ -413,26 +466,12 @@
     }
 
     @media (max-width: 768px) {
-      .app-layout {
-        flex-direction: column;
-      }
-      .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #e0e0e0;
-      }
-      .sidebar-menu {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-      .sidebar-menu li {
-        margin-bottom: 0;
-        flex: 1;
-        min-width: 120px;
-      }
+      .sidebar { display: none; }
+      .mobile-topbar { display: flex; }
+      .mobile-bottomnav { display: block; }
       .main-content {
         padding: 1rem;
+        padding-bottom: 5rem;
       }
       .patients-grid {
         grid-template-columns: 1fr;
@@ -471,6 +510,14 @@
 
 <!-- APP SCREEN -->
 <div class="app-screen" id="appScreen">
+  <div class="mobile-topbar">
+    <div>
+      <h2 id="mobileUserName">Utilisateur</h2>
+      <p id="mobileUserRole">Rôle</p>
+    </div>
+    <button onclick="handleLogout()">Déconnexion</button>
+  </div>
+
   <div class="app-layout">
     <div class="sidebar">
       <div class="sidebar-header">
@@ -605,6 +652,10 @@
       </div>
     </div>
   </div>
+
+  <nav class="mobile-bottomnav">
+    <ul id="mobileNavMenu"></ul>
+  </nav>
 </div>
 
 <!-- ADD PATIENT MODAL -->
@@ -678,9 +729,11 @@
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').classList.add('active');
     
+    const roleLabel = currentUser.role === 'patient' ? 'Patient' : 'Thérapeute';
     document.getElementById('userNameDisplay').textContent = currentUser.name;
-    document.getElementById('userRoleDisplay').textContent = 
-      currentUser.role === 'patient' ? 'Patient' : 'Thérapeute';
+    document.getElementById('userRoleDisplay').textContent = roleLabel;
+    document.getElementById('mobileUserName').textContent = currentUser.name;
+    document.getElementById('mobileUserRole').textContent = roleLabel;
 
     updateSidebar();
     
@@ -694,14 +747,16 @@
   }
 
   function updateSidebar() {
-    const menu = document.getElementById('sidebarMenu');
-    menu.innerHTML = '';
+    const items = currentUser.role === 'patient'
+      ? [{ label: '📊 Mon suivi', page: 'patientDashboard' }]
+      : [{ label: '👥 Mes patients', page: 'professionalDashboard' }];
 
-    if (currentUser.role === 'patient') {
-      menu.innerHTML = '<li><button onclick="showPage(\'patientDashboard\')"><i class="ti ti-dashboard"></i> Mon suivi</button></li>';
-    } else {
-      menu.innerHTML = '<li><button onclick="showPage(\'professionalDashboard\')"><i class="ti ti-users"></i> Mes patients</button></li>';
-    }
+    const liHTML = items.map(item =>
+      `<li><button onclick="showPage('${item.page}')">${item.label}</button></li>`
+    ).join('');
+
+    document.getElementById('sidebarMenu').innerHTML = liHTML;
+    document.getElementById('mobileNavMenu').innerHTML = liHTML;
   }
 
   function showPage(pageId) {
